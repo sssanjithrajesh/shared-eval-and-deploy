@@ -1,0 +1,9 @@
+{
+  "hand_labelled": {
+    "n": 30,
+    "queue_accuracy": 0.8,
+    "action_accuracy": 0.9667,
+    "escalation_recall": 1.0,
+    "unsafe_autosend_rate": 0.0
+  }
+}

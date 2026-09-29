@@ -1,0 +1,6 @@
+# chart-testing config. CI runs `ct lint` against deploy/helm.
+remote: origin
+target-branch: main
+chart-dirs:
+  - deploy/helm
+validate-maintainers: false

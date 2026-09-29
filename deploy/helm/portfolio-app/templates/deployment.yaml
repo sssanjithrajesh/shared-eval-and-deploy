@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "app.fullname" . }}-app
+  labels: {{- include "app.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.app.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "app.name" . }}
+      app.kubernetes.io/component: app
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "app.name" . }}
+        app.kubernetes.io/component: app
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+      containers:
+        - name: app
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.app.command }}
+          command: {{- toYaml .Values.app.command | nindent 12 }}
+          {{- end }}
+          ports:
+            - containerPort: {{ .Values.app.port }}
+          env: {{- include "app.env" . | nindent 12 }}
+          readinessProbe:
+            httpGet: { path: {{ .Values.app.healthPath }}, port: {{ .Values.app.port }} }
+            initialDelaySeconds: 5
+          livenessProbe:
+            httpGet: { path: {{ .Values.app.healthPath }}, port: {{ .Values.app.port }} }
+            initialDelaySeconds: 20
+          resources: {{- toYaml .Values.app.resources | nindent 12 }}
+---
+{{- if .Values.worker.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "app.fullname" . }}-worker
+  labels: {{- include "app.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "app.name" . }}
+      app.kubernetes.io/component: worker
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "app.name" . }}
+        app.kubernetes.io/component: worker
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+      containers:
+        - name: worker
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          command: {{- toYaml .Values.worker.command | nindent 12 }}
+          env: {{- include "app.env" . | nindent 12 }}
+          resources: {{- toYaml .Values.worker.resources | nindent 12 }}
+{{- end }}

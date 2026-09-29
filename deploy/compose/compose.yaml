@@ -1,0 +1,56 @@
+# Portfolio compose template. Copy next to a project's Dockerfile.
+#
+#   docker compose up --build --wait
+#   # --wait returns only after app's healthcheck is healthy
+#
+# Air-gapped: APP_OFFLINE=1 docker compose up --wait
+# (no outbound tokens required; the app must honour APP_OFFLINE)
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dev-only}
+      POSTGRES_DB: app
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d app"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${PORT:-8000}:8000"
+    environment:
+      DATABASE_URL: postgresql+psycopg://app:${POSTGRES_PASSWORD:-dev-only}@db:5432/app
+      APP_OFFLINE: ${APP_OFFLINE:-0}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz')"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  worker:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+      app:
+        condition: service_healthy
+    command: ["app-worker"]
+    environment:
+      DATABASE_URL: postgresql+psycopg://app:${POSTGRES_PASSWORD:-dev-only}@db:5432/app
+      APP_OFFLINE: ${APP_OFFLINE:-0}
+    restart: unless-stopped
+
+volumes:
+  pgdata:
