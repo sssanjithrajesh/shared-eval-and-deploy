@@ -1,0 +1,39 @@
+# Defaults for a customer's private cluster. Override per environment with -f.
+
+image:
+  repository: ghcr.io/example/app
+  tag: "0.1.0"
+  pullPolicy: IfNotPresent
+
+# Air-gapped deployments set offline: true. Egress 443 is then denied.
+offline: false
+
+database:
+  url: ""
+  existingSecret: ""
+
+secrets:
+  anthropicApiKey: ""
+
+app:
+  replicas: 2
+  command: []
+  port: 8000
+  healthPath: /healthz
+  resources:
+    requests: { cpu: 100m, memory: 256Mi }
+    limits: { cpu: "1", memory: 1Gi }
+
+worker:
+  enabled: true
+  command: ["app-worker"]
+  resources:
+    requests: { cpu: 50m, memory: 128Mi }
+    limits: { cpu: 250m, memory: 256Mi }
+
+service:
+  type: ClusterIP
+  port: 80
+
+networkPolicy:
+  enabled: true

@@ -1,0 +1,8 @@
+{
+  "n": 120,
+  "presence_accuracy": 0.825,
+  "span_recall": 0.6196,
+  "citation_precision": 0.3846,
+  "false_refusal_rate": 0.0926,
+  "hallucinated_presence_rate": 0.2424
+}

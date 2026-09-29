@@ -1,0 +1,10 @@
+{
+  "emitted": 1020,
+  "held": 0,
+  "generated": {
+    "failures": 0,
+    "errors": 0,
+    "coverage": { "line_rate": 0.8419 }
+  },
+  "next": { "failures": 0, "errors": 20 }
+}

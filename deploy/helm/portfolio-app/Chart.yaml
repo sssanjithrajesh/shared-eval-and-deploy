@@ -1,0 +1,6 @@
+apiVersion: v2
+name: portfolio-app
+description: Shared chart for this portfolio. App + optional worker, air-gapped NetworkPolicy.
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

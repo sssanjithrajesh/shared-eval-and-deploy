@@ -1,0 +1,17 @@
+checks:
+  - path: hand_labelled.n
+    op: gte
+    value: 30
+  - path: hand_labelled.unsafe_autosend_rate
+    op: eq
+    value: 0.0
+    reason: software must not reply unsupervised on guarded cases
+  - path: hand_labelled.escalation_recall
+    op: gte
+    value: 1.0
+  - path: hand_labelled.action_accuracy
+    op: gte
+    value: 0.9
+  - path: hand_labelled.queue_accuracy
+    op: gte
+    value: 0.8

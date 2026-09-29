@@ -1,0 +1,32 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test-and-eval:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - uses: azure/setup-helm@v4
+        with:
+          version: v3.16.2
+      - run: uv sync --extra dev
+      - name: lint
+        run: uv run ruff check . && uv run ruff format --check .
+      - name: tests
+        run: uv run pytest -q
+      - name: compose template
+        run: uv run seval compose
+      - name: helm lint + air-gap render
+        run: |
+          helm lint deploy/helm/portfolio-app
+          uv run seval chart
+      - name: replay every portfolio gate against its committed summary
+        run: |
+          uv run seval gate --summary examples/summaries/legacy-test-writer.json --gate examples/gates/legacy-test-writer.yaml
+          uv run seval gate --summary examples/summaries/support-ops-agent.json --gate examples/gates/support-ops-agent.yaml
+          uv run seval gate --summary examples/summaries/contract-compliance-reviewer.json --gate examples/gates/contract-compliance-reviewer.yaml

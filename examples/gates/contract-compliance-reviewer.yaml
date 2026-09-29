@@ -1,0 +1,14 @@
+checks:
+  - path: n
+    op: gte
+    value: 120
+  - path: presence_accuracy
+    op: gte
+    value: 0.82
+  - path: span_recall
+    op: gte
+    value: 0.6
+  - path: hallucinated_presence_rate
+    op: lte
+    value: 0.25
+    reason: hybrid retrieval still invents some clauses; do not raise this to hide it
